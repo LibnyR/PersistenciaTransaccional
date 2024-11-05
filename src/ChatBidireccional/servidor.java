@@ -6,7 +6,8 @@ import java.util.*;
 
 public class servidor {
 
-    //private static Set<ClientHandler> clientHandlers = new HashSet<>();
+    // con la map puedo mantener la lista de los clientes conectados.
+	// con el handler manejo la conexion de cada cliente.
     private static Map<String, ClientHandler> clients = new HashMap<>();
 
     public static void main(String[] args) {
@@ -23,17 +24,19 @@ public class servidor {
             e.printStackTrace();
         }
     }
-
+    // con el implementacion de Runnable manejo las conexiones en hilos separados. 
     private static class ClientHandler implements Runnable {
         private Socket socket;
         private PrintWriter out;
         private BufferedReader in;
         private String username;
-
+        
+        // este es el constructor que toma el socket del cliente
         public ClientHandler(Socket socket) {
             this.socket = socket;
         }
-
+        
+        // este es el metodo que se inicia cuando se crea un hilo nuevo  
         public void run() {
             try {
                 in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -96,13 +99,14 @@ public class servidor {
             System.out.println(userList);
         }
 
-        // Esto me sirve para emitir un mensaje a los clientes
+        // Esto me sirve para emitir un mensaje a los clientes conectados
         private void broadcastMessage(String message) {
             for (ClientHandler client : clients.values()) {
                 client.out.println(message);
             }
         }
-
+        //  con esto cierro la conexion del cliente, y con el synchronized 
+        // lo eliminino de la lista y nitifico a los demas clientes.
         private void closeConnection() {
             try {
                 socket.close();
